@@ -1,12 +1,10 @@
 package dev.ralo.example.authentication;
 
+import dev.ralo.example.registration.ConfirmationTokenService;
 import dev.ralo.example.registration.RegistrationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -14,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final ConfirmationTokenService confirmationTokenService;
 
     @PostMapping("/signin")
     public ResponseEntity<Object> authenticate(@RequestBody AuthenticationRequest authenticationRequest) {
@@ -29,6 +28,16 @@ public class AuthenticationController {
         try {
             authenticationService.register(registrationRequest);
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<Object> confirm(@RequestParam("token") String token) {
+        try {
+            confirmationTokenService.confirmToken(token);
+            return ResponseEntity.ok("Thank you! Your account is now verified");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
