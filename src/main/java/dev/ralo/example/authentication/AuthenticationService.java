@@ -1,6 +1,9 @@
 package dev.ralo.example.authentication;
 
+import dev.ralo.example.email.EmailService;
 import dev.ralo.example.jwt.JwtService;
+import dev.ralo.example.registration.ConfirmationToken;
+import dev.ralo.example.registration.ConfirmationTokenService;
 import dev.ralo.example.registration.RegistrationRequest;
 import dev.ralo.example.user.UserEntity;
 import dev.ralo.example.user.UserService;
@@ -20,6 +23,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final EmailService emailService;
+    private final ConfirmationTokenService confirmationTokenService;
 
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         try {
@@ -53,13 +58,15 @@ public class AuthenticationService {
 
     @Transactional
     public void register(RegistrationRequest registrationRequest) {
-        //TODO: add validation logic which doesnt belong to the user service
-        userService.save(UserEntity.builder()
+        //TODO: add validation logic for password, email, etc.
+        UserEntity user = userService.save(UserEntity.builder()
                 .username(registrationRequest.username())
                 .password(registrationRequest.password())
-                .role("ROLE_USER")
+                .role(registrationRequest.role() == null ? "ROLE_USER" : registrationRequest.role())
+                .email(registrationRequest.email())
                 .build()
         );
+        ConfirmationToken confirmationToken = confirmationTokenService.generateToken(user);
+        emailService.send(confirmationToken);
     }
-
 }
