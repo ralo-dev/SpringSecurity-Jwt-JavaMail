@@ -35,4 +35,11 @@ public class UserService implements UserDetailsService {
     public Collection<UserEntity> findAll() {
         return userRepository.findAll();
     }
+
+    public void enableUser(String username) {
+        UserEntity userEntity = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException(username));
+        userEntity.setEnabled(true);
+        userRepository.save(userEntity);
+    }
 }

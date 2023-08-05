@@ -1,9 +1,7 @@
 package dev.ralo.example.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import dev.ralo.example.registration.ConfirmationToken;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,11 +23,15 @@ public class UserEntity implements UserDetails {
     private Long id;
     private String username;
     private String password;
+    private String email;
     private String role;
     @Builder.Default
-    private boolean enabled = true;
+    private boolean enabled = false;
     @Builder.Default
     private boolean locked = false;
+
+    @OneToOne(mappedBy = "userEntity", cascade = CascadeType.ALL)
+    private ConfirmationToken confirmationToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
